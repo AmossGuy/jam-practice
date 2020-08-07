@@ -1,0 +1,11 @@
+[package]
+name = "jam-practice"
+version = "0.1.0"
+authors = ["AmossGuy <yellowilya@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+gate = "0.6.3"
+
+[build-dependencies]
+gate_build = "0.6.3"
