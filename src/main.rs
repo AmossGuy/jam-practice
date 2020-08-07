@@ -10,8 +10,6 @@ mod asset_id { include!(concat!(env!("OUT_DIR"), "/asset_id.rs")); }
 use crate::asset_id::{AssetId, MusicId, SoundId};
 
 use std::collections::HashSet;
-use std::f64::consts::PI;
-const TAU: f64 = 2. * PI;
 
 mod spaceship;
 use spaceship::Spaceship;
@@ -25,7 +23,7 @@ impl Game {
     fn new() -> Self {
         Game {
             pressed_keys: HashSet::new(),
-            objects: vec![Spaceship::new(10., 10., -45. * TAU / 360.)],
+            objects: vec![Spaceship::new(10., 10., -45.)],
         }
     }
 }
