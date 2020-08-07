@@ -1,20 +1,29 @@
 #[macro_use]
 extern crate gate;
 
+gate_header!();
+
 use gate::{App, AppContext, AppInfo, KeyCode};
-use gate::renderer::Renderer;
+use gate::renderer::{Affine, Renderer};
 
 mod asset_id { include!(concat!(env!("OUT_DIR"), "/asset_id.rs")); }
 use crate::asset_id::{AssetId, SpriteId, MusicId, SoundId};
 
-gate_header!();
+mod spaceship;
+use spaceship::Spaceship;
+
+use std::f64::consts::PI;
+const TAU: f64 = 2. * PI;
 
 struct Game {
+    objects: Vec<Spaceship>,
 }
 
 impl Game {
     fn new() -> Self {
-        Game {}
+        Game {
+            objects: vec![Spaceship::new(10., 10., -45. * TAU / 360.)],
+        }
     }
 }
 
@@ -27,12 +36,16 @@ impl App<AssetId> for Game {
 
     fn render(&mut self, renderer: &mut Renderer<AssetId>, _ctx: &AppContext<AssetId>) {
         renderer.clear((0, 46, 85));
+
+        for object in &self.objects {
+            object.render(renderer);
+        }
     }
 }
 
 fn main() {
-    let info = AppInfo::with_max_dims(160., 90.)
-                       .min_dims(120., 86.)
+    let info = AppInfo::with_max_dims(200., 200.)
+                       .min_dims(200., 200.)
                        .tile_width(8)
                        .title("Practice");
     gate::run(info, Game::new());
