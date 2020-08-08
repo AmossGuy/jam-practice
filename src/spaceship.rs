@@ -21,7 +21,7 @@ fn move_value_towards(value: &mut f64, goal: f64, speed: f64) {
     }
 }
 
-const timer_length: f64 = 1. / 16.;
+const TIMER_LENGTH: f64 = 1. / 16.;
 
 pub struct Spaceship {
     pos: Vector2,
@@ -31,6 +31,7 @@ pub struct Spaceship {
     charge: Option<f64>,
     effect_flags: [bool; 3],
     effect_timer: f64,
+    shot_timer: f64,
 }
 
 impl Spaceship {
@@ -42,7 +43,8 @@ impl Spaceship {
             ang_vel: 0.,
             charge: None,
             effect_flags: [false; 3],
-            effect_timer: random::<f64>() * timer_length,
+            effect_timer: random::<f64>() * TIMER_LENGTH,
+            shot_timer: f64::INFINITY,
         }
     }
 
@@ -53,6 +55,8 @@ impl Spaceship {
         let down = pressed_keys.contains(&KeyCode::Down);
         let space = pressed_keys.contains(&KeyCode::Space);
 
+        self.shot_timer += seconds;
+
         if space && self.charge == None {
             self.charge = Some(seconds);
         } else if let Some(c) = &self.charge {
@@ -60,12 +64,13 @@ impl Spaceship {
         }
 
         if self.charge >= Some(1.) {
+            self.shot_timer = 0.;
             self.charge = None;
         }
 
         self.effect_timer += seconds;
-        if self.effect_timer >= timer_length {
-            self.effect_timer -= timer_length;
+        if self.effect_timer >= TIMER_LENGTH {
+            self.effect_timer -= TIMER_LENGTH;
             self.effect_flags = [
                 random::<bool>(),
                 random::<bool>(),
@@ -126,5 +131,9 @@ impl Spaceship {
 
             renderer_s.draw(&eff_aff, SpriteId::Charge);
         }
+    }
+
+    pub fn get_flash(&self) -> f64 {
+        (1. - self.shot_timer / 2.).max(0.)
     }
 }

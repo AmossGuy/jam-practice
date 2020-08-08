@@ -47,7 +47,16 @@ impl App<AssetId> for Game {
     }
 
     fn render(&mut self, renderer: &mut Renderer<AssetId>, _ctx: &AppContext<AssetId>) {
-        renderer.clear((0, 46, 85));
+        let mut flash = 0.;
+        for object in &self.objects {
+            flash += object.get_flash();
+        }
+
+        let r = (0. * (1.-flash) + 255. * flash).round() as u8;
+        let g = (46. * (1.-flash) + 255. * flash).round() as u8;
+        let b = (85. * (1.-flash) + 255. * flash).round() as u8;
+
+        renderer.clear((r, g, b));
 
         for object in &self.objects {
             object.render(renderer);
