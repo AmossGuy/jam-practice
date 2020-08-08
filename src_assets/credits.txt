@@ -1,1 +1,5 @@
-Graphics: https://www.kenney.nl/assets/micro-roguelike
+Graphics:
+  https://www.kenney.nl/assets/micro-roguelike
+Sound:
+  https://freesound.org/people/JavierZumer/sounds/257229/
+  https://freesound.org/people/InspectorJ/sounds/411231/

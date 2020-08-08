@@ -1,7 +1,7 @@
-use gate::KeyCode;
+use gate::{AppContext, KeyCode};
 use gate::renderer::{Affine, Renderer};
 
-use crate::asset_id::{AssetId, SpriteId};
+use crate::asset_id::{AssetId, SoundId, SpriteId};
 
 use std::collections::HashSet;
 use std::f64::consts::PI;
@@ -48,7 +48,12 @@ impl Spaceship {
         }
     }
 
-    pub fn advance(&mut self, seconds: f64, pressed_keys: &HashSet<KeyCode>) {
+    pub fn advance(
+        &mut self,
+        seconds: f64,
+        pressed_keys: &HashSet<KeyCode>,
+        ctx: &mut AppContext<AssetId>,
+    ) {
         let left = pressed_keys.contains(&KeyCode::Left);
         let right = pressed_keys.contains(&KeyCode::Right);
         let up = pressed_keys.contains(&KeyCode::Up);
@@ -59,6 +64,8 @@ impl Spaceship {
 
         if space && self.charge == None {
             self.charge = Some(seconds);
+
+            ctx.audio.play_sound(SoundId::Charge);
         } else if let Some(c) = &self.charge {
             self.charge = Some(c + seconds);
         }
@@ -66,6 +73,8 @@ impl Spaceship {
         if self.charge >= Some(1.) {
             self.shot_timer = 0.;
             self.charge = None;
+
+            ctx.audio.play_sound(SoundId::BigShot);
         }
 
         self.effect_timer += seconds;

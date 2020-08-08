@@ -7,7 +7,7 @@ use gate::{App, AppContext, AppInfo, KeyCode};
 use gate::renderer::Renderer;
 
 mod asset_id { include!(concat!(env!("OUT_DIR"), "/asset_id.rs")); }
-use crate::asset_id::{AssetId, MusicId, SoundId};
+use crate::asset_id::{AssetId};
 
 use std::collections::HashSet;
 
@@ -32,9 +32,9 @@ impl Game {
 }
 
 impl App<AssetId> for Game {
-    fn advance(&mut self, seconds: f64, _ctx: &mut AppContext<AssetId>) {
+    fn advance(&mut self, seconds: f64, ctx: &mut AppContext<AssetId>) {
         for object in &mut self.objects {
-            object.advance(seconds, &self.pressed_keys);
+            object.advance(seconds, &self.pressed_keys, ctx);
         }
     }
 
