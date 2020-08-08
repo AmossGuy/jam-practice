@@ -1,3 +1,5 @@
+use collider::geom::Vec2;
+
 use gate::{AppContext, KeyCode};
 use gate::renderer::{Affine, Renderer};
 
@@ -10,7 +12,6 @@ const TAU: f64 = 2. * PI;
 use rand::random;
 
 use crate::Object;
-use crate::vector2::Vector2;
 
 fn move_value_towards(value: &mut f64, goal: f64, speed: f64) {
     if goal > *value {
@@ -25,9 +26,9 @@ fn move_value_towards(value: &mut f64, goal: f64, speed: f64) {
 const TIMER_LENGTH: f64 = 1. / 16.;
 
 pub struct Spaceship {
-    pos: Vector2,
+    pos: Vec2,
     angle: f64,
-    lin_vel: Vector2,
+    lin_vel: Vec2,
     ang_vel: f64,
     charge: Option<f64>,
     effect_flags: [bool; 3],
@@ -36,11 +37,11 @@ pub struct Spaceship {
 }
 
 impl Spaceship {
-    pub fn new(pos: Vector2, angle: f64) -> Self {
+    pub fn new(pos: Vec2, angle: f64) -> Self {
         Spaceship {
             pos,
             angle,
-            lin_vel: Vector2::new(0., 0.),
+            lin_vel: Vec2::new(0., 0.),
             ang_vel: 0.,
             charge: None,
             effect_flags: [false; 3],
@@ -91,8 +92,8 @@ impl Object for Spaceship {
         }
 
         let goal_a = match (left, right) {
-            (true, false) => 360.,
-            (false, true) => -360.,
+            (true, false) => -360.,
+            (false, true) => 360.,
             _ => 0.,
         };
 
@@ -101,17 +102,17 @@ impl Object for Spaceship {
         self.angle += self.ang_vel * seconds;
 
         if up {
-            self.lin_vel += Vector2::from_dir_mag(self.angle, 40.) * seconds;
+            self.lin_vel += Vec2::new(40., 0.).rotate((-self.angle + 90.) * TAU / 360.) * seconds;
         } else {
-            if self.lin_vel.magnitude() != 0. {
+            if self.lin_vel.len() != 0. {
                  let deaccel = match down {
                      true => 80.,
                      false => 20.,
                  };
 
-                let mut new_mag = self.lin_vel.magnitude() - deaccel * seconds;
+                let mut new_mag = self.lin_vel.len() - deaccel * seconds;
                 new_mag = new_mag.max(0.);
-                self.lin_vel = self.lin_vel.unit() * new_mag;
+                self.lin_vel = self.lin_vel.normalize().unwrap() * new_mag;
             }
         }
 
@@ -122,14 +123,14 @@ impl Object for Spaceship {
         let mut renderer_s = renderer.sprite_mode();
 
         let transform = Affine::translate(self.pos.x, self.pos.y)
-                               .pre_rotate(self.angle * TAU / 360.);
+                               .pre_rotate(-self.angle * TAU / 360.);
 
         renderer_s.draw(&transform, SpriteId::Spaceship);
 
         if self.charge.is_some() {
             let mut eff_aff = Affine::translate(self.pos.x, self.pos.y);
-            let v = Vector2::from_dir_mag(self.angle, 6.);
-            eff_aff = eff_aff.post_translate(v.x, v.y); // .pre_rotate(self.angle * TAU / 360.);
+            let v = Vec2::new(6., 0.).rotate((-self.angle + 90.) * TAU / 360.);
+            eff_aff = eff_aff.post_translate(v.x, v.y);
 
             if self.effect_flags[0] {
                 eff_aff = eff_aff.pre_rotate(90. * TAU / 360.);

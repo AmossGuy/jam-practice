@@ -5,6 +5,7 @@ authors = ["AmossGuy <yellowilya@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+collider = "0.3.1"
 gate = "0.6.3"
 rand = "0.7.3"
 

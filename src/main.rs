@@ -3,6 +3,8 @@ extern crate gate;
 
 gate_header!();
 
+use collider::geom::Vec2;
+
 use gate::{App, AppContext, AppInfo, KeyCode};
 use gate::renderer::Renderer;
 
@@ -14,9 +16,6 @@ use std::collections::HashSet;
 mod spaceship;
 use spaceship::Spaceship;
 
-mod vector2;
-use vector2::Vector2;
-
 struct Game {
     pressed_keys: HashSet<KeyCode>,
     objects: Vec<Box<dyn Object>>,
@@ -26,7 +25,7 @@ impl Game {
     fn new() -> Self {
         Game {
             pressed_keys: HashSet::new(),
-            objects: vec![Box::new(Spaceship::new(Vector2::new(10., 10.), -45.))],
+            objects: vec![Box::new(Spaceship::new(Vec2::new(10., 10.), 45.))],
         }
     }
 }
