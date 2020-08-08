@@ -52,12 +52,15 @@ impl Spaceship {
 
         self.angle += self.ang_vel * seconds;
 
-        let g_speed_l = match up {
-            true => 40.,
-            false => 0.,
-        };
-
-        self.lin_vel += Vector2::from_dir_mag(self.angle, g_speed_l) * seconds;
+        if up {
+            self.lin_vel += Vector2::from_dir_mag(self.angle, 40.) * seconds;
+        } else {
+            if self.lin_vel.magnitude() != 0. {
+                let mut new_mag = self.lin_vel.magnitude() - 40. * seconds;
+                new_mag = new_mag.max(0.);
+                self.lin_vel = self.lin_vel.unit() * new_mag;
+            }
+        }
 
         self.pos += self.lin_vel * seconds;
     }
