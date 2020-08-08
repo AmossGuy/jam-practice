@@ -7,6 +7,8 @@ use std::collections::HashSet;
 use std::f64::consts::PI;
 const TAU: f64 = 2. * PI;
 
+use crate::vector2::Vector2;
+
 fn move_value_towards(value: &mut f64, goal: f64, speed: f64) {
     if goal > *value {
         *value += speed;
@@ -18,22 +20,18 @@ fn move_value_towards(value: &mut f64, goal: f64, speed: f64) {
 }
 
 pub struct Spaceship {
-    x: f64,
-    y: f64,
+    pos: Vector2,
     angle: f64,
-    x_vel: f64,
-    y_vel: f64,
+    lin_vel: Vector2,
     ang_vel: f64,
 }
 
 impl Spaceship {
-    pub fn new(x: f64, y: f64, angle: f64) -> Self {
+    pub fn new(pos: Vector2, angle: f64) -> Self {
         Spaceship {
-            x,
-            y,
+            pos,
             angle,
-            x_vel: 0.,
-            y_vel: 0.,
+            lin_vel: Vector2::new(0., 0.),
             ang_vel: 0.,
         }
     }
@@ -59,17 +57,16 @@ impl Spaceship {
             false => 0.,
         };
 
-        self.x_vel += -(self.angle * TAU / 360.).sin() * seconds * g_speed_l;
-        self.y_vel += (self.angle * TAU / 360.).cos() * seconds * g_speed_l;
+        self.lin_vel += Vector2::from_dir_mag(self.angle, g_speed_l) * seconds;
 
-        self.x += seconds * self.x_vel;
-        self.y += seconds * self.y_vel;
+        self.pos += self.lin_vel * seconds;
     }
 
     pub fn render(&self, renderer: &mut Renderer<AssetId>) {
         let mut renderer_s = renderer.sprite_mode();
 
-        let transform = Affine::translate(self.x, self.y).pre_rotate(self.angle * TAU / 360.);
+        let transform = Affine::translate(self.pos.x, self.pos.y)
+                               .pre_rotate(self.angle * TAU / 360.);
 
         renderer_s.draw(&transform, SpriteId::Spaceship);
     }

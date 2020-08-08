@@ -14,6 +14,9 @@ use std::collections::HashSet;
 mod spaceship;
 use spaceship::Spaceship;
 
+mod vector2;
+use vector2::Vector2;
+
 struct Game {
     pressed_keys: HashSet<KeyCode>,
     objects: Vec<Spaceship>,
@@ -23,7 +26,7 @@ impl Game {
     fn new() -> Self {
         Game {
             pressed_keys: HashSet::new(),
-            objects: vec![Spaceship::new(10., 10., -45.)],
+            objects: vec![Spaceship::new(Vector2::new(10., 10.), -45.)],
         }
     }
 }
