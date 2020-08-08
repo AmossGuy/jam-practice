@@ -12,6 +12,7 @@ const TAU: f64 = 2. * PI;
 use rand::random;
 
 use crate::Object;
+use crate::SCREEN_SIZE;
 
 fn move_value_towards(value: &mut f64, goal: f64, speed: f64) {
     if goal > *value {
@@ -119,11 +120,12 @@ impl Object for Spaceship {
         self.pos += self.lin_vel * seconds;
     }
 
-    fn render(&self, renderer: &mut Renderer<AssetId>) {
+    fn render(&self, renderer: &mut Renderer<AssetId>, camera: Vec2) {
         let mut renderer_s = renderer.sprite_mode();
 
         let transform = Affine::translate(self.pos.x, self.pos.y)
-                               .pre_rotate(-self.angle * TAU / 360.);
+                               .pre_rotate(-self.angle * TAU / 360.)
+                               .post_translate(-camera.x, -camera.y);
 
         renderer_s.draw(&transform, SpriteId::Spaceship);
 
@@ -131,6 +133,7 @@ impl Object for Spaceship {
             let mut eff_aff = Affine::translate(self.pos.x, self.pos.y);
             let v = Vec2::new(6., 0.).rotate((-self.angle + 90.) * TAU / 360.);
             eff_aff = eff_aff.post_translate(v.x, v.y);
+            eff_aff = eff_aff.post_translate(-camera.x, -camera.y);
 
             if self.effect_flags[0] {
                 eff_aff = eff_aff.pre_rotate(90. * TAU / 360.);
@@ -148,5 +151,9 @@ impl Object for Spaceship {
 
     fn get_flash(&self) -> f64 {
         (1. - self.shot_timer / 2.).max(0.)
+    }
+
+    fn get_camera(&self) -> Option<Vec2> {
+        Some(self.pos - Vec2::new(SCREEN_SIZE.x / 2., SCREEN_SIZE.y / 2.))
     }
 }
