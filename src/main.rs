@@ -19,14 +19,14 @@ use vector2::Vector2;
 
 struct Game {
     pressed_keys: HashSet<KeyCode>,
-    objects: Vec<Spaceship>,
+    objects: Vec<Box<dyn Object>>,
 }
 
 impl Game {
     fn new() -> Self {
         Game {
             pressed_keys: HashSet::new(),
-            objects: vec![Spaceship::new(Vector2::new(10., 10.), -45.)],
+            objects: vec![Box::new(Spaceship::new(Vector2::new(10., 10.), -45.))],
         }
     }
 }
@@ -61,6 +61,21 @@ impl App<AssetId> for Game {
         for object in &self.objects {
             object.render(renderer);
         }
+    }
+}
+
+pub trait Object {
+    fn advance(
+        &mut self,
+        seconds: f64,
+        pressed_keys: &HashSet<KeyCode>,
+        ctx: &mut AppContext<AssetId>,
+    );
+
+    fn render(&self, renderer: &mut Renderer<AssetId>);
+
+    fn get_flash(&self) -> f64 {
+        0.
     }
 }
 

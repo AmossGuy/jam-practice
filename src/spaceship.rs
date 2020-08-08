@@ -9,6 +9,7 @@ const TAU: f64 = 2. * PI;
 
 use rand::random;
 
+use crate::Object;
 use crate::vector2::Vector2;
 
 fn move_value_towards(value: &mut f64, goal: f64, speed: f64) {
@@ -47,8 +48,10 @@ impl Spaceship {
             shot_timer: f64::INFINITY,
         }
     }
+}
 
-    pub fn advance(
+impl Object for Spaceship {
+    fn advance(
         &mut self,
         seconds: f64,
         pressed_keys: &HashSet<KeyCode>,
@@ -115,7 +118,7 @@ impl Spaceship {
         self.pos += self.lin_vel * seconds;
     }
 
-    pub fn render(&self, renderer: &mut Renderer<AssetId>) {
+    fn render(&self, renderer: &mut Renderer<AssetId>) {
         let mut renderer_s = renderer.sprite_mode();
 
         let transform = Affine::translate(self.pos.x, self.pos.y)
@@ -142,7 +145,7 @@ impl Spaceship {
         }
     }
 
-    pub fn get_flash(&self) -> f64 {
+    fn get_flash(&self) -> f64 {
         (1. - self.shot_timer / 2.).max(0.)
     }
 }
