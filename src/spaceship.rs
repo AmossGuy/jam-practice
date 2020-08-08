@@ -20,8 +20,9 @@ fn move_value_towards(value: &mut f64, goal: f64, speed: f64) {
 pub struct Spaceship {
     x: f64,
     y: f64,
-    lin_vel: f64,
     angle: f64,
+    x_vel: f64,
+    y_vel: f64,
     ang_vel: f64,
 }
 
@@ -30,8 +31,9 @@ impl Spaceship {
         Spaceship {
             x,
             y,
-            lin_vel: 0.,
             angle,
+            x_vel: 0.,
+            y_vel: 0.,
             ang_vel: 0.,
         }
     }
@@ -52,20 +54,16 @@ impl Spaceship {
 
         self.angle += self.ang_vel * seconds;
 
-        let goal_l = match up {
-            true => 100.,
+        let g_speed_l = match up {
+            true => 40.,
             false => 0.,
         };
 
-        let g_speed_l = match down && !up {
-            true => 160.,
-            false => 40.,
-        };
+        self.x_vel += -(self.angle * TAU / 360.).sin() * seconds * g_speed_l;
+        self.y_vel += (self.angle * TAU / 360.).cos() * seconds * g_speed_l;
 
-        move_value_towards(&mut self.lin_vel, goal_l, g_speed_l * seconds);
-
-        self.x += -(self.angle * TAU / 360.).sin() * seconds * self.lin_vel;
-        self.y += (self.angle * TAU / 360.).cos() * seconds * self.lin_vel;
+        self.x += seconds * self.x_vel;
+        self.y += seconds * self.y_vel;
     }
 
     pub fn render(&self, renderer: &mut Renderer<AssetId>) {
