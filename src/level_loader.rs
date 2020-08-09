@@ -43,11 +43,12 @@ pub fn load_level(id: usize) -> World {
 
     for x in 0..data.width {
         for y in 0..data.height {
+            let c = data.grid[y][x];
             match data.grid[y][x] {
                 'q' | 'w' | 'e' | 'd' | 'c' | 'x' | 'z' | 'a' => {
                     world.objects.push(Box::new(Spaceship::new(
                         Vec2::new(x as f64 * 8., y as f64 * -8.),
-                        45.,
+                        angles(['q', 'w', 'e', 'd', 'c', 'x', 'z', 'a'], c),
                     )));
                 },
                 '#' => tilemap.set_tile(x, y, Some(SpriteId::TileR0C0)),
@@ -60,4 +61,16 @@ pub fn load_level(id: usize) -> World {
     world.objects.push(Box::new(tilemap));
 
     world
+}
+
+fn angles(symbols: [char; 8], symbol: char) -> f64 {
+    if symbol == symbols[0] { return -45.; }
+    else if symbol == symbols[1] { return 0.; }
+    else if symbol == symbols[2] { return 45.; }
+    else if symbol == symbols[3] { return 90.; }
+    else if symbol == symbols[4] { return 135.; }
+    else if symbol == symbols[5] { return 180.; }
+    else if symbol == symbols[6] { return 225.; }
+    else if symbol == symbols[7] { return 270.; }
+    else { panic!(); }
 }
