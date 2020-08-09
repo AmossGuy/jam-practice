@@ -14,6 +14,7 @@ use crate::asset_id::{AssetId};
 use std::collections::HashSet;
 
 mod spaceship;
+mod tilemap;
 
 mod level_loader;
 use level_loader::{load_level, World};
@@ -78,9 +79,13 @@ pub trait Object {
         seconds: f64,
         pressed_keys: &HashSet<KeyCode>,
         ctx: &mut AppContext<AssetId>,
-    );
+    ) {
+        // do nothing
+    }
 
-    fn render(&self, renderer: &mut Renderer<AssetId>, camera: Vec2);
+    fn render(&self, renderer: &mut Renderer<AssetId>, camera: Vec2) {
+        // do nothing
+    }
 
     fn get_flash(&self) -> f64 {
         0.

@@ -1,7 +1,10 @@
 use collider::geom::Vec2;
 
+use crate::asset_id::SpriteId;
+
 use crate::Object;
 use crate::spaceship::Spaceship;
+use crate::tilemap::Tilemap;
 
 const LEVELS: [&'static str; 1] = [
     include_str!("levels/level1.txt"),
@@ -36,8 +39,10 @@ pub fn load_level(id: usize) -> World {
         objects: Vec::new(),
     };
 
-    for x in 0..data.width-1 {
-        for y in 0..data.height-1 {
+    let mut tilemap = Tilemap::new(data.width, data.height);
+
+    for x in 0..data.width {
+        for y in 0..data.height {
             match data.grid[y][x] {
                 'q' | 'w' | 'e' | 'd' | 'c' | 'x' | 'z' | 'a' => {
                     world.objects.push(Box::new(Spaceship::new(
@@ -45,11 +50,14 @@ pub fn load_level(id: usize) -> World {
                         45.,
                     )));
                 },
-                ' ' | '#' => (),
+                '#' => tilemap.set_tile(x, y, Some(SpriteId::TileR0C0)),
+                ' ' => (),
                 _ => panic!(),
             }
         }
     }
+
+    world.objects.push(Box::new(tilemap));
 
     world
 }
