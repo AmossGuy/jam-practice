@@ -52,12 +52,13 @@ impl App<AssetId> for Game {
         self.pressed_keys.remove(&key);
     }
 
-    fn render(&mut self, renderer: &mut Renderer<AssetId>, _ctx: &AppContext<AssetId>) {
+    fn render(&mut self, renderer: &mut Renderer<AssetId>, ctx: &AppContext<AssetId>) {
         let mut flash = 0.;
         for object in &self.world.objects {
             flash += object.get_flash();
             if let Some(cam) = object.get_camera() {
-                self.camera = cam;
+                let (x, y) = ctx.native_px_align(cam.x, cam.y);
+                self.camera = Vec2::new(x, y);
             }
         }
 
