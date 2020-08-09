@@ -1,13 +1,8 @@
 use collider::geom::Vec2;
 
-use gate::{AppContext, KeyCode};
 use gate::renderer::{Affine, Renderer};
 
 use crate::asset_id::{AssetId, SpriteId};
-
-use std::collections::HashSet;
-use std::f64::consts::PI;
-const TAU: f64 = 2. * PI;
 
 use crate::Object;
 

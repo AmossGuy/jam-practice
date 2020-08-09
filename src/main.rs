@@ -77,14 +77,14 @@ impl App<AssetId> for Game {
 pub trait Object {
     fn advance(
         &mut self,
-        seconds: f64,
-        pressed_keys: &HashSet<KeyCode>,
-        ctx: &mut AppContext<AssetId>,
+        _seconds: f64,
+        _pressed_keys: &HashSet<KeyCode>,
+        _ctx: &mut AppContext<AssetId>,
     ) {
         // do nothing
     }
 
-    fn render(&self, renderer: &mut Renderer<AssetId>, camera: Vec2) {
+    fn render(&self, _renderer: &mut Renderer<AssetId>, _camera: Vec2) {
         // do nothing
     }
 
