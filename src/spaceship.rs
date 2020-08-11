@@ -1,3 +1,4 @@
+use collider::{Collider, HbVel};
 use collider::geom::Vec2;
 
 use gate::{AppContext, KeyCode};
@@ -13,6 +14,7 @@ use rand::random;
 
 use crate::Object;
 use crate::SCREEN_SIZE;
+use crate::collision::MyHbProfile;
 
 fn move_value_towards(value: &mut f64, goal: f64, speed: f64) {
     if goal > *value {
@@ -27,27 +29,25 @@ fn move_value_towards(value: &mut f64, goal: f64, speed: f64) {
 const TIMER_LENGTH: f64 = 1. / 16.;
 
 pub struct Spaceship {
-    pos: Vec2,
     angle: f64,
-    lin_vel: Vec2,
     ang_vel: f64,
     charge: Option<f64>,
     effect_flags: [bool; 3],
     effect_timer: f64,
     shot_timer: f64,
+    hb_id: u64,
 }
 
 impl Spaceship {
-    pub fn new(pos: Vec2, angle: f64) -> Self {
+    pub fn new(angle: f64, hb_id: u64) -> Self {
         Spaceship {
-            pos,
             angle,
-            lin_vel: Vec2::new(0., 0.),
             ang_vel: 0.,
             charge: None,
             effect_flags: [false; 3],
             effect_timer: random::<f64>() * TIMER_LENGTH,
             shot_timer: f64::INFINITY,
+            hb_id,
         }
     }
 }
@@ -58,6 +58,7 @@ impl Object for Spaceship {
         seconds: f64,
         pressed_keys: &HashSet<KeyCode>,
         ctx: &mut AppContext<AssetId>,
+        collider: &mut Collider<MyHbProfile>,
     ) {
         let left = pressed_keys.contains(&KeyCode::Left);
         let right = pressed_keys.contains(&KeyCode::Right);
@@ -102,35 +103,38 @@ impl Object for Spaceship {
 
         self.angle += self.ang_vel * seconds;
 
+        let prev_vel = collider.get_hitbox(self.hb_id).vel.value;
+
         if up {
-            self.lin_vel += Vec2::new(40., 0.).rotate((-self.angle + 90.) * TAU / 360.) * seconds;
+            let extra = Vec2::new(40., 0.).rotate((-self.angle + 90.) * TAU / 360.) * seconds;
+            collider.set_hitbox_vel(self.hb_id, HbVel::moving(prev_vel + extra));
         } else {
-            if self.lin_vel.len() != 0. {
+            if prev_vel.len() != 0. {
                  let deaccel = match down {
                      true => 80.,
                      false => 20.,
                  };
 
-                let mut new_mag = self.lin_vel.len() - deaccel * seconds;
+                let mut new_mag = prev_vel.len() - deaccel * seconds;
                 new_mag = new_mag.max(0.);
-                self.lin_vel = self.lin_vel.normalize().unwrap() * new_mag;
+                let aaaaaa = prev_vel.normalize().unwrap() * new_mag;
+                collider.set_hitbox_vel(self.hb_id, HbVel::moving(aaaaaa));
             }
         }
-
-        self.pos += self.lin_vel * seconds;
     }
+    fn render(&self, collider: &Collider<MyHbProfile>, renderer: &mut Renderer<AssetId>, camera: Vec2) {
+        let pos = collider.get_hitbox(self.hb_id).value.pos;
 
-    fn render(&self, renderer: &mut Renderer<AssetId>, camera: Vec2) {
         let mut renderer_s = renderer.sprite_mode();
 
-        let transform = Affine::translate(self.pos.x, self.pos.y)
+        let transform = Affine::translate(pos.x, pos.y)
                                .pre_rotate(-self.angle * TAU / 360.)
                                .post_translate(-camera.x, -camera.y);
 
         renderer_s.draw(&transform, SpriteId::Spaceship);
 
         if self.charge.is_some() {
-            let mut eff_aff = Affine::translate(self.pos.x, self.pos.y);
+            let mut eff_aff = Affine::translate(pos.x, pos.y);
             let v = Vec2::new(6., 0.).rotate((-self.angle + 90.) * TAU / 360.);
             eff_aff = eff_aff.post_translate(v.x, v.y);
             eff_aff = eff_aff.post_translate(-camera.x, -camera.y);
@@ -149,11 +153,12 @@ impl Object for Spaceship {
         }
     }
 
-    fn get_flash(&self) -> f64 {
+    fn get_flash(&self, _collider: &Collider<MyHbProfile>) -> f64 {
         (1. - self.shot_timer / 2.).max(0.)
     }
 
-    fn get_camera(&self) -> Option<Vec2> {
-        Some(self.pos - Vec2::new(SCREEN_SIZE.x / 2., SCREEN_SIZE.y / 2.))
+    fn get_camera(&self, collider: &Collider<MyHbProfile>) -> Option<Vec2> {
+        let pos = collider.get_hitbox(self.hb_id).value.pos;
+        Some(pos - Vec2::new(SCREEN_SIZE.x / 2., SCREEN_SIZE.y / 2.))
     }
 }

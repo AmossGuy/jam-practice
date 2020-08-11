@@ -1,8 +1,10 @@
-use collider::geom::Vec2;
+use collider::Collider;
+use collider::geom::{Shape, Vec2};
 
 use crate::asset_id::SpriteId;
 
 use crate::Object;
+use crate::collision::MyHbProfile;
 use crate::spaceship::Spaceship;
 use crate::tilemap::Tilemap;
 
@@ -30,6 +32,7 @@ fn load_data(id: usize) -> LevelData {
 
 pub struct World {
     pub objects: Vec<Box<dyn Object>>,
+    pub collider: Collider<MyHbProfile>,
 }
 
 pub fn load_level(id: usize) -> World {
@@ -37,9 +40,12 @@ pub fn load_level(id: usize) -> World {
 
     let mut world = World {
         objects: Vec::new(),
+        collider: Collider::new(),
     };
 
     let mut tilemap = Tilemap::new(data.width, data.height);
+
+    let mut hb_id: u64 = 0;
 
     for x in 0..data.width {
         for y in 0..data.height {
@@ -47,9 +53,14 @@ pub fn load_level(id: usize) -> World {
             match data.grid[y][x] {
                 'q' | 'w' | 'e' | 'd' | 'c' | 'x' | 'z' | 'a' => {
                     world.objects.push(Box::new(Spaceship::new(
-                        Vec2::new(x as f64 * 8., y as f64 * -8.),
                         angles(['q', 'w', 'e', 'd', 'c', 'x', 'z', 'a'], c),
+                        hb_id,
                     )));
+                    let hitbox = Shape::square(8.)
+                        .place(Vec2::new(x as f64 * 8., y as f64 * -8.))
+                        .still();
+                    world.collider.add_hitbox(MyHbProfile { id: hb_id }, hitbox);
+                    hb_id += 1;
                 },
                 '#' => tilemap.set_tile(x, y, Some(SpriteId::TileR0C0)),
                 ' ' => (),

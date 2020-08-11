@@ -3,6 +3,7 @@ extern crate gate;
 
 gate_header!();
 
+use collider::Collider;
 use collider::geom::Vec2;
 
 use gate::{App, AppContext, AppInfo, KeyCode};
@@ -15,6 +16,9 @@ use std::collections::HashSet;
 
 mod spaceship;
 mod tilemap;
+
+mod collision;
+use collision::MyHbProfile;
 
 mod level_loader;
 use level_loader::{load_level, World};
@@ -39,8 +43,18 @@ impl Game {
 
 impl App<AssetId> for Game {
     fn advance(&mut self, seconds: f64, ctx: &mut AppContext<AssetId>) {
+        let target_time = self.world.collider.time() + seconds;
+
         for object in &mut self.world.objects {
-            object.advance(seconds, &self.pressed_keys, ctx);
+            object.advance(seconds, &self.pressed_keys, ctx, &mut self.world.collider);
+        }
+
+        while self.world.collider.time() < target_time {
+            let t = self.world.collider.next_time().min(target_time);
+            self.world.collider.set_time(t);
+
+            if let Some((_event, _profile_1, _profile_2)) = self.world.collider.next() {
+            }
         }
     }
 
@@ -55,8 +69,8 @@ impl App<AssetId> for Game {
     fn render(&mut self, renderer: &mut Renderer<AssetId>, ctx: &AppContext<AssetId>) {
         let mut flash = 0.;
         for object in &self.world.objects {
-            flash += object.get_flash();
-            if let Some(cam) = object.get_camera() {
+            flash += object.get_flash(&self.world.collider);
+            if let Some(cam) = object.get_camera(&self.world.collider) {
                 let (x, y) = ctx.native_px_align(cam.x, cam.y);
                 self.camera = Vec2::new(x, y);
             }
@@ -69,7 +83,7 @@ impl App<AssetId> for Game {
         renderer.clear((r, g, b));
 
         for object in &self.world.objects {
-            object.render(renderer, self.camera);
+            object.render(&self.world.collider, renderer, self.camera);
         }
     }
 }
@@ -80,19 +94,19 @@ pub trait Object {
         _seconds: f64,
         _pressed_keys: &HashSet<KeyCode>,
         _ctx: &mut AppContext<AssetId>,
+        _collider: &mut Collider<MyHbProfile>,
     ) {
         // do nothing
     }
-
-    fn render(&self, _renderer: &mut Renderer<AssetId>, _camera: Vec2) {
+    fn render(&self, _collider: &Collider<MyHbProfile>, _renderer: &mut Renderer<AssetId>, _camera: Vec2) {
         // do nothing
     }
 
-    fn get_flash(&self) -> f64 {
+    fn get_flash(&self, _collider: &Collider<MyHbProfile>) -> f64 {
         0.
     }
 
-    fn get_camera(&self) -> Option<Vec2> {
+    fn get_camera(&self, _collider: &Collider<MyHbProfile>) -> Option<Vec2> {
         None
     }
 }

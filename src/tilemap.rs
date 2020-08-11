@@ -1,3 +1,4 @@
+use collider::Collider;
 use collider::geom::Vec2;
 
 use gate::renderer::{Affine, Renderer};
@@ -5,6 +6,7 @@ use gate::renderer::{Affine, Renderer};
 use crate::asset_id::{AssetId, SpriteId};
 
 use crate::Object;
+use crate::collision::MyHbProfile;
 
 pub struct Tilemap {
     width: usize,
@@ -27,7 +29,7 @@ impl Tilemap {
 }
 
 impl Object for Tilemap {
-    fn render(&self, renderer: &mut Renderer<AssetId>, camera: Vec2) {
+    fn render(&self, _collider: &Collider<MyHbProfile>, renderer: &mut Renderer<AssetId>, camera: Vec2) {
         let mut renderer_s = renderer.sprite_mode();
 
         for x in 0..self.width {
